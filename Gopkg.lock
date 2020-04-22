@@ -126,6 +126,14 @@
   revision = "f15a3290365b9d2627d189e619ab4008e0069caf"
 
 [[projects]]
+  branch = "master"
+  digest = "1:2301a9a859e3b0946e2ddd6961ba6faf6857e6e68bc9293db758dbe3b17cc35e"
+  name = "github.com/containerd/go-cni"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "c154a49e2c754b83ebfb12ebf1362213b94d23e6"
+
+[[projects]]
   digest = "1:6d66a41dbbc6819902f1589d0550bc01c18032c0a598a7cd656731e6df73861b"
   name = "github.com/containerd/ttrpc"
   packages = ["."]
@@ -140,6 +148,21 @@
   pruneopts = "UT"
   revision = "a93fcdb778cd272c6e9b3028b2f42d813e785d40"
   version = "v1.0.0"
+
+[[projects]]
+  digest = "1:1a07bbfee1d0534e8dda4773948e6dcd3a061ea7ab047ce04619476946226483"
+  name = "github.com/containernetworking/cni"
+  packages = [
+    "libcni",
+    "pkg/invoke",
+    "pkg/types",
+    "pkg/types/020",
+    "pkg/types/current",
+    "pkg/version",
+  ]
+  pruneopts = "UT"
+  revision = "4cfb7b568922a3c79a23e438dc52fe537fc9687e"
+  version = "v0.7.1"
 
 [[projects]]
   digest = "1:5d7f88f9487f370e3ae52155465156370fc5798102d811d2d4448d2385ccaf67"
@@ -457,6 +480,8 @@
     "github.com/containerd/containerd/cio",
     "github.com/containerd/containerd/namespaces",
     "github.com/containerd/containerd/oci",
+    "github.com/containerd/go-cni",
+    "github.com/opencontainers/runtime-spec/specs-go",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
