@@ -27,10 +27,10 @@ func main() {
 func testExample() error {
 
     //modify runtime
-    /*c_opts_runtime := containerd.WithDefaultRuntime("io.containerd.kata.v2")
+    c_opts_runtime := containerd.WithDefaultRuntime("io.containerd.kata.v2")
     client, err := containerd.New("/run/containerd/containerd.sock", c_opts_runtime)
-    fmt.Println("this is kata runtime")*/
-    client, err := containerd.New("/run/containerd/containerd.sock")
+    fmt.Println("this is kata runtime")
+    //client, err := containerd.New("/run/containerd/containerd.sock")
     if err != nil {
         return err
     }
