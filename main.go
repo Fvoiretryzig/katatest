@@ -9,13 +9,14 @@ import (
 	"os"
 	"path"
 	
+	"katatest/handlers"
+	
 	"github.com/containerd/containerd"
 	"github.com/containerd/containerd/cio"
 	"github.com/containerd/containerd/oci"
 	"github.com/containerd/containerd/namespaces"
 	
 	"github.com/opencontainers/runtime-spec/specs-go"
-	//gocni "github.com/containerd/go-cni"
 )
 
 func main() {
@@ -27,10 +28,10 @@ func main() {
 func testExample() error {
 
     //modify runtime
-    c_opts_runtime := containerd.WithDefaultRuntime("io.containerd.kata.v2")
-    client, err := containerd.New("/run/containerd/containerd.sock", c_opts_runtime)
-    fmt.Println("this is kata runtime")
-    //client, err := containerd.New("/run/containerd/containerd.sock")
+    //c_opts_runtime := containerd.WithDefaultRuntime("io.containerd.kata.v2")
+    //client, err := containerd.New("/run/containerd/containerd.sock", c_opts_runtime)
+    //fmt.Println("this is kata runtime")
+    client, err := containerd.New("/run/containerd/containerd.sock")
     if err != nil {
         return err
     }
@@ -42,14 +43,7 @@ func testExample() error {
     if err != nil {
 		return err
 	}
-	// mounts TODO()
-	/*container, err := client.NewContainer(
-		ctx,
-		"redistest",
-		containerd.WithImage(image),
-		containerd.WithNewSnapshot("redis-snapshot", image),
-		containerd.WithNewSpec(oci.WithImageConfig(image)),
-	)*/
+	
 	snapshotter := ""
 	mounts := getMounts()
 	fmt.Println("this is before newcontainer")
@@ -76,7 +70,23 @@ func testExample() error {
 	fmt.Println("this is after newtask")
 	defer task.Delete(ctx)
 	log.Printf("[CreateTask]Task ID: %s, Task PID: %d\t\n", task.ID(), task.Pid())
+	
 	//Create cni network TODO()
+	cni, err := handlers.InitNetwork()
+	if err != nil {
+		panic(err)
+	}
+	labels := map[string]string{}
+	network, err := handlers.CreateCNINetwork(ctx, cni, task, labels)
+    fmt.Println("[CreateTask] this is network interface: ", network.Interfaces)
+	if err != nil {
+		return err
+	}
+	ip, err := handlers.GetIPAddress(network, task)
+	if err != nil {
+		return err
+	}
+	log.Printf("!!!!!!!This is IP: %s.\n", ip.String())
 	
 	exitStatusC, err := task.Wait(ctx)
 	if err != nil {
@@ -87,7 +97,7 @@ func testExample() error {
 		return err
 	}
 	fmt.Println("this is after start task")
-	time.Sleep(3 * time.Second)
+	time.Sleep(5 * time.Second)
 	if err := task.Kill(ctx, syscall.SIGTERM); err != nil {
 		return err
 	}
