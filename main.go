@@ -8,14 +8,14 @@ import (
 	"time"
 	"os"
 	"path"
-	
+
 	"katatest/handlers"
-	
+
 	"github.com/containerd/containerd"
 	"github.com/containerd/containerd/cio"
 	"github.com/containerd/containerd/oci"
 	"github.com/containerd/containerd/namespaces"
-	
+
 	"github.com/opencontainers/runtime-spec/specs-go"
 )
 
@@ -28,33 +28,35 @@ func main() {
 func testExample() error {
 
     //modify runtime
-    //c_opts_runtime := containerd.WithDefaultRuntime("io.containerd.kata.v2")
-    //client, err := containerd.New("/run/containerd/containerd.sock", c_opts_runtime)
-    //fmt.Println("this is kata runtime")
-    client, err := containerd.New("/run/containerd/containerd.sock")
+    c_opts_runtime := containerd.WithDefaultRuntime("io.containerd.kata.v2")
+    client, err := containerd.New("/run/containerd/containerd.sock", c_opts_runtime)
+    fmt.Println("this is kata runtime")
+    //client, err := containerd.New("/run/containerd/containerd.sock")
     if err != nil {
         return err
     }
     defer client.Close()
-   
-    ctx := namespaces.WithNamespace(context.Background(), "ctrtest")   
+
+    ctx := namespaces.WithNamespace(context.Background(), "ctrtest")
     fmt.Println("this is before pull image")
-    image, err := client.Pull(ctx, "docker.io/alexellis2/ping:0.1", containerd.WithPullUnpack)
+    //image, err := client.Pull(ctx, "docker.io/alexellis2/ping:0.1", containerd.WithPullUnpack)
+    image, err := client.Pull(ctx, "docker.io/library/redis:alpine", containerd.WithPullUnpack)
+    //docker.io/library/redis:alpine
     if err != nil {
 		return err
 	}
-	
+
 	snapshotter := ""
 	mounts := getMounts()
 	fmt.Println("this is before newcontainer")
 	container, err := client.NewContainer(
 		ctx,
-		"katatest",
+		"katatest2",
 		containerd.WithImage(image),
 		containerd.WithSnapshotter(snapshotter),
-		containerd.WithNewSnapshot("kata-snapshot", image),
+		containerd.WithNewSnapshot("katasnapshot", image),
 		containerd.WithNewSpec(oci.WithImageConfig(image),
-			oci.WithCapabilities([]string{"CAP_NET_RAW"}),
+			/*oci.WithCapabilities([]string{"CAP_NET_RAW"}),*/
 			oci.WithMounts(mounts)),
 	)
 	fmt.Println("this is after newcontainer")
@@ -70,8 +72,9 @@ func testExample() error {
 	fmt.Println("this is after newtask")
 	defer task.Delete(ctx)
 	log.Printf("[CreateTask]Task ID: %s, Task PID: %d\t\n", task.ID(), task.Pid())
-	
+
 	//Create cni network TODO()
+	fmt.Println("[[[[[[[[[[[begin set network]]]]]]]]]")
 	cni, err := handlers.InitNetwork()
 	if err != nil {
 		panic(err)
@@ -86,8 +89,8 @@ func testExample() error {
 	if err != nil {
 		return err
 	}
-	log.Printf("!!!!!!!This is IP: %s.\n", ip.String())
-	
+	log.Printf("[[[[[set network finish]]]]]]]]This is IP: %s.\n", ip.String())
+
 	exitStatusC, err := task.Wait(ctx)
 	if err != nil {
 		fmt.Println(err)
@@ -97,7 +100,7 @@ func testExample() error {
 		return err
 	}
 	fmt.Println("this is after start task")
-	time.Sleep(5 * time.Second)
+	time.Sleep(20 * time.Second)
 	if err := task.Kill(ctx, syscall.SIGTERM); err != nil {
 		return err
 	}

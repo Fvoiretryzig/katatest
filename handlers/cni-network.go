@@ -20,10 +20,10 @@ const (
 	CNIBinDir = "/opt/cni/bin"
 	CNIConfDir = "/etc/cni/net.d"
 	NetNSPathFmt = "/proc/%d/ns/net"
-	defaultCNIConfFilename = "10-mynet.conflist"
-	defaultNetworkName = "openfaas-cni-bridge"
-	defaultBridgeName = "openfaas0"
-	defaultSubnet = "10.62.0.0/16"
+	defaultCNIConfFilename = "10-mynet.conf"
+	defaultNetworkName = "mynet"
+	defaultBridgeName = "cni0"
+	defaultSubnet = "172.19.0.0/24"
 )
 
 var defaultCNIConf = fmt.Sprintf(`
@@ -43,13 +43,28 @@ var defaultCNIConf = fmt.Sprintf(`
                 { "dst": "0.0.0.0/0" }
             ]
         }
-      },
-      {
-        "type": "firewall"
       }
     ]
 }
 `, defaultNetworkName, defaultBridgeName, defaultSubnet)
+
+/* var defaultCNIConf = fmt.Sprintf(`
+{
+	"cniVersion": "0.2.0",
+	"name": "%s",
+	"type": "bridge",
+	"bridge": "%s",
+	"isGateway": true,
+	"ipMasq": true,
+	"ipam": {
+		"type": "host-local",
+		"subnet": "%s",
+		"routes": [
+			{ "dst": "0.0.0.0/0" }
+		]
+	}
+}
+`, defaultNetworkName, defaultBridgeName, defaultSubnet)*/
 
 func InitNetwork() (gocni.CNI, error) {
 	log.Printf("Writing network config...\n")
