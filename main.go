@@ -107,7 +107,7 @@ func testExample() error {
 	return err
     }
     log.Println("after task.start")
-    time.Sleep(20 * time.Second)
+    time.Sleep(180 * time.Second)
     if err := task.Kill(ctx, syscall.SIGTERM); err != nil {
 	return err
     }
